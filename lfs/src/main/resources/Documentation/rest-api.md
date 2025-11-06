@@ -18,6 +18,30 @@ Gets the LFS configuration for a specified project.
 As response an [LfsProjectConfigInfo](#lfs-project-config-info) entity is
 returned that describes the LFS configuration for the project.
 
+## Set project configuration
+
+_PUT /projects/project_name/@PLUGIN@:config-project_
+
+Sets the LFS configuration for a specified project. When the request body is
+empty or the `remove` flag is set to `true`, the explicit configuration for the
+project is removed so that it inherits from matching namespaces configured in
+`All-Projects`.
+
+```
+  PUT /projects/myproject/@PLUGIN@:config-project HTTP/1.0
+  Content-Type: application/json;charset=UTF-8
+
+  {
+    "enabled": true,
+    "read_only": false,
+    "max_object_size": 1073741824,
+    "backend": "foo"
+  }
+```
+
+As response an [LfsProjectConfigInfo](#lfs-project-config-info) entity is
+returned that describes the updated configuration.
+
 ```
   HTTP/1.1 200 OK
   Content-Disposition: attachment
@@ -122,6 +146,10 @@ _enabled_ is true. 0 means no limit is set.
 _enabled_ is true.
 * _backend_: LFS storage backend that is used by this project. Only set when
 _enabled_ is true.
+* _namespace_: Namespace expression that currently applies to the project.
+* _inherited_: Whether the project inherits its configuration from another
+namespace. `true` when no explicit configuration exists.
+* _available_backends_: Map of backend identifiers to their storage types.
 
 ### <a id="lfs-global-config-info"></a>LfsGlobalConfigInfo
 
@@ -132,6 +160,18 @@ The `LfsGlobalConfigInfo` entity describes the global configuration for LFS.
 map of backend name to storage type (either `FS` or `S3`).
 * _namespaces_: Configured namespaces as a map of [LfsProjectConfigInfo]
 (#lfs-project-config-info) entities.
+
+### <a id="lfs-project-config-input"></a>LfsProjectConfigInput
+
+The `LfsProjectConfigInput` entity describes the project configuration to set.
+
+* _enabled_: Whether LFS is enabled for this project. Not set if false.
+* _max_object_size_: Maximum LFS object size for this project. Only set when
+_enabled_ is true. 0 means no limit is set.
+* _read_only_: Whether LFS is in read-only mode for this project. Only set when
+_enabled_ is true.
+* _backend_: LFS storage backend that is used by this project.
+* _remove_: When set to `true`, removes the explicit project configuration.
 
 ### <a id="lfs-global-config-input"></a>LfsGlobalConfigInput
 

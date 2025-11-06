@@ -1,4 +1,4 @@
-// Copyright (C) 2016 The Android Open Source Project
+// Copyright (C) 2025 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,14 +14,10 @@
 
 package com.googlesource.gerrit.plugins.lfs;
 
-import java.util.Map;
-
-public class LfsProjectConfigInfo {
+public class LfsProjectConfigInput {
   public Boolean enabled;
   public Long maxObjectSize;
   public Boolean readOnly;
   public String backend;
-  public String namespace;
-  public Boolean inherited;
-  public Map<String, LfsBackendType> availableBackends;
+  public Boolean remove;
 }

@@ -36,6 +36,7 @@ public class Module extends FactoryModule {
             get(PROJECT_KIND, "lfs:config-project").to(GetLfsProjectConfig.class);
             get(PROJECT_KIND, "lfs:config-global").to(GetLfsGlobalConfig.class);
             put(PROJECT_KIND, "lfs:config-global").to(PutLfsGlobalConfig.class);
+            put(PROJECT_KIND, "lfs:config-project").to(PutLfsProjectConfig.class);
           }
         });
 
