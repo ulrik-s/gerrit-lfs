@@ -14,6 +14,7 @@
 
 package com.googlesource.gerrit.plugins.lfs;
 
+import com.google.common.collect.Maps;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.extensions.restapi.RestReadView;
@@ -34,6 +35,9 @@ class GetLfsProjectConfig implements RestReadView<ProjectResource> {
   @Override
   public Response<LfsProjectConfigInfo> apply(ProjectResource resource) throws RestApiException {
     LfsProjectConfigInfo info = new LfsProjectConfigInfo();
+    info.availableBackends =
+        Maps.transformValues(
+            lfsConfigFactory.getGlobalConfig().getBackends(), backend -> backend.type);
     LfsProjectConfigSection config =
         lfsConfigFactory.getProjectsConfig().getForProject(resource.getNameKey());
     if (config != null) {
@@ -41,6 +45,11 @@ class GetLfsProjectConfig implements RestReadView<ProjectResource> {
       info.maxObjectSize = config.getMaxObjectSize();
       info.readOnly = config.isReadOnly();
       info.backend = config.getBackend();
+      info.namespace = config.getNamespace();
+      info.inherited =
+          !resource.getNameKey().get().equals(config.getNamespace());
+    } else {
+      info.inherited = true;
     }
     return Response.ok(info);
   }

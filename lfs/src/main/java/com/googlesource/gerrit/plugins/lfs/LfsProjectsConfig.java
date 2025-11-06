@@ -15,6 +15,10 @@
 package com.googlesource.gerrit.plugins.lfs;
 
 import static com.google.gerrit.entities.RefNames.REFS_CONFIG;
+import static com.googlesource.gerrit.plugins.lfs.LfsProjectConfigSection.KEY_BACKEND;
+import static com.googlesource.gerrit.plugins.lfs.LfsProjectConfigSection.KEY_ENABLED;
+import static com.googlesource.gerrit.plugins.lfs.LfsProjectConfigSection.KEY_MAX_OBJECT_SIZE;
+import static com.googlesource.gerrit.plugins.lfs.LfsProjectConfigSection.KEY_READ_ONLY;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -104,6 +108,50 @@ public class LfsProjectsConfig extends VersionedMetaData {
     this.projectConfig = cfg;
   }
 
+  public void upsertNamespace(String namespace, LfsProjectConfigInput input) {
+    if (Strings.isNullOrEmpty(namespace)) {
+      return;
+    }
+
+    if (projectConfig == null) {
+      projectConfig = new Config();
+    }
+
+    if (input.enabled != null) {
+      projectConfig.setBoolean(LfsProjectConfigSection.LFS, namespace, KEY_ENABLED, input.enabled);
+    } else {
+      projectConfig.unset(LfsProjectConfigSection.LFS, namespace, KEY_ENABLED);
+    }
+
+    if (input.maxObjectSize != null) {
+      projectConfig.setLong(
+          LfsProjectConfigSection.LFS, namespace, KEY_MAX_OBJECT_SIZE, input.maxObjectSize);
+    } else {
+      projectConfig.unset(LfsProjectConfigSection.LFS, namespace, KEY_MAX_OBJECT_SIZE);
+    }
+
+    if (input.readOnly != null) {
+      projectConfig.setBoolean(LfsProjectConfigSection.LFS, namespace, KEY_READ_ONLY, input.readOnly);
+    } else {
+      projectConfig.unset(LfsProjectConfigSection.LFS, namespace, KEY_READ_ONLY);
+    }
+
+    if (!Strings.isNullOrEmpty(input.backend)) {
+      projectConfig.setString(LfsProjectConfigSection.LFS, namespace, KEY_BACKEND, input.backend);
+    } else {
+      projectConfig.unset(LfsProjectConfigSection.LFS, namespace, KEY_BACKEND);
+    }
+  }
+
+  public void removeNamespace(String namespace) {
+    if (!Strings.isNullOrEmpty(namespace)) {
+      if (projectConfig == null) {
+        return;
+      }
+      projectConfig.unsetSection(LfsProjectConfigSection.LFS, namespace);
+    }
+  }
+
   private Config loadProjectConfig() {
     return projectCache.getAllProjects().getConfig(configFilename).get();
   }
@@ -115,7 +163,7 @@ public class LfsProjectsConfig extends VersionedMetaData {
 
   @Override
   protected void onLoad() throws IOException, ConfigInvalidException {
-    loadProjectConfig();
+    projectConfig = loadProjectConfig();
   }
 
   @Override

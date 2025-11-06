@@ -14,6 +14,7 @@
 
 package com.googlesource.gerrit.plugins.lfs;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
 import com.google.gerrit.acceptance.TestPlugin;
 import com.google.gerrit.entities.Project;
@@ -49,7 +50,28 @@ public class LfsIT extends LightweightPluginDaemonTest {
     adminRestSession.get(globalConfig(project)).assertNotFound();
   }
 
+  @Test
+  public void projectConfigCanBeUpdatedByAdmin() throws Exception {
+    adminRestSession
+        .put(
+            projectConfig(project),
+            ImmutableMap.of("enabled", true, "read_only", false, "max_object_size", 1024))
+        .assertOK();
+    adminRestSession.get(projectConfig(project)).assertOK();
+  }
+
+  @Test
+  public void projectConfigCannotBeUpdatedWithoutPermission() throws Exception {
+    userRestSession
+        .put(projectConfig(project), ImmutableMap.of("enabled", true))
+        .assertForbidden();
+  }
+
   private static String globalConfig(Project.NameKey name) {
     return String.format("/projects/%s/lfs:config-global", name.get());
+  }
+
+  private static String projectConfig(Project.NameKey name) {
+    return String.format("/projects/%s/lfs:config-project", name.get());
   }
 }
